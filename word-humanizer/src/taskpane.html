@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Chapter Humanizer</title>
+  <link rel="stylesheet" href="taskpane.css"/>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+</head>
+<body>
+  <div id="app">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2">
+          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+        <h1>Chapter Humanizer</h1>
+      </div>
+      <p class="subtitle">Remove AI patterns paragraph by paragraph</p>
+    </div>
+
+    <!-- API Key -->
+    <div class="section" id="api-section">
+      <label>Anthropic API Key</label>
+      <div class="input-row">
+        <input type="password" id="api-key" placeholder="sk-ant-api03-..."/>
+        <button class="btn-secondary" id="save-key-btn">Save</button>
+      </div>
+      <p class="hint" id="key-status"></p>
+    </div>
+
+    <!-- Scan controls -->
+    <div class="controls">
+      <button class="btn-primary" id="scan-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        Scan Document
+      </button>
+      <button class="btn-outline" id="humanize-selection-btn" title="Humanize selected text only">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>
+        </svg>
+        Selection
+      </button>
+    </div>
+
+    <!-- Progress -->
+    <div id="progress-section" class="hidden">
+      <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+      <p id="progress-text" class="hint">Scanning...</p>
+    </div>
+
+    <!-- Summary bar (shown after scan) -->
+    <div id="summary-bar" class="summary-bar hidden">
+      <span id="summary-text"></span>
+      <button class="btn-accept-all" id="accept-all-btn">Accept All</button>
+    </div>
+
+    <!-- Paragraph cards -->
+    <div id="paragraph-list"></div>
+
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="taskpane.js"></script>
+</body>
+</html>

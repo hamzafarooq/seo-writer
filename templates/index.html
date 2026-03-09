@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SEO Article Writer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    color: #222;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #111;
+    color: #fff;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.3px; }
+  header span { font-size: 0.85rem; color: #aaa; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 58px);
+  }
+
+  /* ---- LEFT PANEL: Form ---- */
+  .panel-form {
+    background: #fff;
+    border-right: 1px solid #e0e0e0;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .panel-form h2 { font-size: 1rem; font-weight: 700; color: #111; }
+
+  label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  input[type="text"],
+  input[type="number"],
+  textarea {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 0.9rem;
+    font-family: Arial, sans-serif;
+    color: #222;
+    background: #fafafa;
+    transition: border-color 0.15s;
+    resize: vertical;
+  }
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #111;
+    background: #fff;
+  }
+
+  textarea { min-height: 90px; }
+
+  .hint { font-size: 0.75rem; color: #888; margin-top: 4px; }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 80px; gap: 12px; }
+
+  button[type="submit"] {
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 11px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+    width: 100%;
+  }
+  button[type="submit"]:hover { background: #333; }
+  button[type="submit"]:disabled { background: #999; cursor: not-allowed; }
+
+  /* Progress log */
+  .progress-box {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .progress-box.visible { display: flex; }
+  .progress-label { font-size: 0.8rem; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.4px; }
+  .log-output {
+    background: #111;
+    color: #00d084;
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    border-radius: 6px;
+    padding: 12px;
+    height: 280px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .log-output .err { color: #ff6b6b; }
+  .log-output .done { color: #ffd700; font-weight: bold; }
+
+  /* Status badge */
+  .status-badge {
+    display: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .status-badge.success { display: block; background: #e6f9f0; color: #1a8a56; border: 1px solid #b2dfce; }
+  .status-badge.error   { display: block; background: #fdecea; color: #c0392b; border: 1px solid #f5c6c2; }
+
+  /* ---- RIGHT PANEL: Articles ---- */
+  .panel-articles {
+    padding: 28px 28px 40px;
+    overflow-y: auto;
+  }
+
+  .panel-articles h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 20px;
+  }
+
+  .articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .article-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: box-shadow 0.15s;
+  }
+  .article-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+
+  .card-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.4;
+  }
+
+  .card-desc {
+    font-size: 0.78rem;
+    color: #666;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-meta {
+    display: flex;
+    gap: 10px;
+    font-size: 0.72rem;
+    color: #999;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+  .card-meta span { display: flex; align-items: center; gap: 3px; }
+
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .btn-link {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    border: 1px solid;
+    transition: background 0.12s;
+  }
+  .btn-html  { color: #1a6fc4; border-color: #9ec5f0; background: #eef5fc; }
+  .btn-html:hover  { background: #d7eaf9; }
+  .btn-docx  { color: #1a7a45; border-color: #9ed4b8; background: #eef8f2; }
+  .btn-docx:hover  { background: #d6f0e2; }
+  .btn-md    { color: #7a4a00; border-color: #f0ca80; background: #fef9ee; }
+  .btn-md:hover    { background: #fdf0cc; }
+
+  .empty-state {
+    color: #aaa;
+    font-size: 0.9rem;
+    padding: 40px 0;
+    text-align: center;
+  }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    .panel-form { border-right: none; border-bottom: 1px solid #e0e0e0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SEO Article Writer</h1>
+  <span>Hamza's AI Newsletter Pipeline</span>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT: Generate form -->
+  <aside class="panel-form">
+    <h2>Generate New Article</h2>
+
+    <form id="genForm">
+      <div>
+        <label for="topic">Article Topic</label>
+        <input type="text" id="topic" name="topic" placeholder="e.g. ReAct Agents Explained" required>
+      </div>
+
+      <div>
+        <label for="intent">Intent / Abstract</label>
+        <textarea id="intent" name="intent" placeholder="Describe what you want to achieve and who it's for. Claude will extract the best search keywords from this.&#10;&#10;e.g. I want to explain to developers how ReAct agents work step by step, and why they outperform standard LLMs on tool-use tasks."></textarea>
+        <p class="hint">Replaces the old --keywords flag. More context = better research.</p>
+      </div>
+
+      <div class="row-2">
+        <div>
+          <label for="keywords">Keywords (optional)</label>
+          <input type="text" id="keywords" name="keywords" placeholder="e.g. react agents, AI agents">
+          <p class="hint">Legacy shorthand. Use Intent above instead.</p>
+        </div>
+        <div>
+          <label for="edition">Edition</label>
+          <input type="number" id="edition" name="edition" value="0" min="0">
+        </div>
+      </div>
+
+      <button type="submit" id="submitBtn">Generate Article</button>
+    </form>
+
+    <div class="progress-box" id="progressBox">
+      <div class="progress-label">Pipeline Output</div>
+      <div class="log-output" id="logOutput"></div>
+      <div class="status-badge" id="statusBadge"></div>
+    </div>
+  </aside>
+
+  <!-- RIGHT: Article list -->
+  <main class="panel-articles">
+    <h2>Published Articles</h2>
+    <div class="articles-grid" id="articlesGrid">
+      {% if articles %}
+        {% for a in articles %}
+        <div class="article-card">
+          <div class="card-title">{{ a.title }}</div>
+          {% if a.description %}
+          <div class="card-desc">{{ a.description }}</div>
+          {% endif %}
+          <div class="card-meta">
+            {% if a.generated_at %}<span>{{ a.generated_at }}</span>{% endif %}
+            {% if a.word_count %}<span>{{ "{:,}".format(a.word_count) }} words</span>{% endif %}
+            {% if a.image_count %}<span>{{ a.image_count }} images</span>{% endif %}
+          </div>
+          <div class="card-actions">
+            {% if a.html_file %}
+            <a class="btn-link btn-html" href="/output/{{ a.html_file }}" target="_blank">HTML</a>
+            {% endif %}
+            {% if a.docx_file %}
+            <a class="btn-link btn-docx" href="/output/{{ a.docx_file }}" download>DOCX</a>
+            {% endif %}
+            <a class="btn-link btn-md" href="/output/{{ a.slug }}.md" target="_blank">Markdown</a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="empty-state">No articles yet. Generate your first one!</p>
+      {% endif %}
+    </div>
+  </main>
+
+</div>
+
+<script>
+const form = document.getElementById('genForm');
+const submitBtn = document.getElementById('submitBtn');
+const progressBox = document.getElementById('progressBox');
+const logOutput = document.getElementById('logOutput');
+const statusBadge = document.getElementById('statusBadge');
+const articlesGrid = document.getElementById('articlesGrid');
+
+function appendLog(text, cls) {
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = text;
+  logOutput.appendChild(line);
+  logOutput.scrollTop = logOutput.scrollHeight;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderArticles(articles) {
+  if (!articles.length) {
+    articlesGrid.innerHTML = '<p class="empty-state">No articles yet. Generate your first one!</p>';
+    return;
+  }
+  articlesGrid.innerHTML = articles.map(a => `
+    <div class="article-card">
+      <div class="card-title">${escHtml(a.title)}</div>
+      ${a.description ? `<div class="card-desc">${escHtml(a.description)}</div>` : ''}
+      <div class="card-meta">
+        ${a.generated_at ? `<span>${escHtml(a.generated_at)}</span>` : ''}
+        ${a.word_count ? `<span>${a.word_count.toLocaleString()} words</span>` : ''}
+        ${a.image_count ? `<span>${a.image_count} images</span>` : ''}
+      </div>
+      <div class="card-actions">
+        ${a.html_file ? `<a class="btn-link btn-html" href="/output/${encodeURIComponent(a.html_file)}" target="_blank">HTML</a>` : ''}
+        ${a.docx_file ? `<a class="btn-link btn-docx" href="/output/${encodeURIComponent(a.docx_file)}" download>DOCX</a>` : ''}
+        <a class="btn-link btn-md" href="/output/${encodeURIComponent(a.slug)}.md" target="_blank">Markdown</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function refreshArticles() {
+  try {
+    const resp = await fetch('/api/articles');
+    const articles = await resp.json();
+    renderArticles(articles);
+  } catch (e) { /* silent */ }
+}
+
+function resetSubmit() {
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'Generate Article';
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const topic    = document.getElementById('topic').value.trim();
+  const intent   = document.getElementById('intent').value.trim();
+  const keywords = document.getElementById('keywords').value.trim();
+  const edition  = parseInt(document.getElementById('edition').value) || 0;
+
+  if (!topic) return;
+
+  // Reset UI
+  logOutput.innerHTML = '';
+  statusBadge.className = 'status-badge';
+  statusBadge.textContent = '';
+  progressBox.classList.add('visible');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Generating…';
+
+  appendLog(`Topic  : ${topic}`);
+  if (intent) appendLog(`Intent : ${intent}`);
+  appendLog('Starting pipeline…\n');
+
+  // Step 1: POST to start job, get job_id
+  let jobId;
+  try {
+    const startResp = await fetch('/api/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic, intent: intent || keywords, edition }),
+    });
+    const startData = await startResp.json();
+    if (startData.error) throw new Error(startData.error);
+    jobId = startData.job_id;
+  } catch (err) {
+    appendLog(`\nFailed to start: ${err.message}`, 'err');
+    statusBadge.className = 'status-badge error';
+    statusBadge.textContent = `Error: ${err.message}`;
+    resetSubmit();
+    return;
+  }
+
+  // Step 2: EventSource to stream progress
+  const es = new EventSource(`/api/stream/${jobId}`);
+
+  es.addEventListener('log', (e) => {
+    try { appendLog(JSON.parse(e.data).line); } catch { appendLog(e.data); }
+  });
+
+  es.addEventListener('done', async () => {
+    es.close();
+    appendLog('\nDone!', 'done');
+    statusBadge.className = 'status-badge success';
+    statusBadge.textContent = 'Article generated successfully.';
+    await refreshArticles();
+    resetSubmit();
+  });
+
+  es.addEventListener('error', async (e) => {
+    es.close();
+    let msg = 'Pipeline error';
+    try { msg = JSON.parse(e.data).message; } catch {}
+    appendLog(`\nERROR: ${msg}`, 'err');
+    statusBadge.className = 'status-badge error';
+    statusBadge.textContent = `Error: ${msg}`;
+    // Still refresh in case partial output was written
+    await refreshArticles();
+    resetSubmit();
+  });
+
+  // Fallback: if EventSource itself errors (network issue), recover
+  es.onerror = async () => {
+    if (es.readyState === EventSource.CLOSED) {
+      await refreshArticles();
+      resetSubmit();
+    }
+  };
+});
+</script>
+</body>
+</html>
