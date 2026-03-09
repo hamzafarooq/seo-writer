@@ -1,150 +1,127 @@
-# SEO Article Writer
+# SEO Article Agent
 
-An AI-powered SEO article generator built on Claude. Mirrors the n8n "SEO Blog Writer Agent Technical Blog" workflow, producing fully-formatted articles with images, meta descriptions, and exports to Markdown, HTML, and DOCX.
+An AI agent that writes publication-ready SEO articles. You give it a topic and a goal — it does the research, finds images, and produces a finished article in Markdown, HTML, and DOCX. It also learns from your existing articles, so the output matches your voice and style rather than sounding generic.
 
-## Features
-
-- **8-step pipeline**: SERP research → title refinement → key takeaways → outline → content writing → humanization → meta description → image search
-- **Live SERP data** (optional): Uses SerpAPI for real Google search results and Google Image search
-- **Multiple output formats**: `.md`, `.html`, `.docx`, and `_meta.json`
-- **Web UI**: Flask frontend with real-time streaming progress
-- **CLI**: Run directly from the command line without the web server
+The pipeline runs in 8 steps: live SERP research, title refinement, key takeaways, outline, writing, a humanization pass to strip AI patterns, meta description, and image sourcing. Everything is automated.
 
 ---
 
-## Prerequisites
+## What it does
 
-- Python 3.10+
-- An [Anthropic API key](https://console.anthropic.com/)
-- *(Optional)* A [SerpAPI key](https://serpapi.com/) for live search data and real images
+- **Deep research first** — pulls live Google search results via SerpAPI before writing a single word. The agent reads what's ranking, identifies gaps, and builds the article around those findings.
+- **Learns from your sample articles** — drop your best articles into `sample-articles/` and the agent uses them as style references. The output reads like you wrote it, not like ChatGPT.
+- **Finds real images** — searches Google Images (with SerpAPI) or Unsplash and embeds them directly into the DOCX. No placeholder images.
+- **Humanization pass built in** — after writing, the agent rewrites the draft to remove AI patterns before you ever see it.
+- **Word Add-in included** — `word-humanizer/` is a Microsoft Word sidebar that lets you humanize any paragraph in your own documents, one at a time.
 
 ---
 
 ## Setup
 
-### 1. Clone the repo
+### 1. Clone and configure
 
 ```bash
 git clone <repo-url>
 cd SEO-writer
+cp .env.example .env
 ```
 
-### 2. Configure environment variables
-
-Copy the example and fill in your keys:
-
-```bash
-cp .env .env.local   # or edit .env directly
-```
+Open `.env` and add your keys:
 
 ```ini
-# .env
 ANTHROPIC_API_KEY=sk-ant-...   # required
-SERPAPI_KEY=...                 # optional
+SERPAPI_KEY=...                 # optional but recommended
 ```
 
-> **Warning:** Never commit `.env` with real keys to a public repository.
+### 2. Install dependencies
 
-### 3. Install dependencies
-
-**Option A — with `uv` (no install needed):**
-
+With `uv` (no setup needed):
 ```bash
-# Web server
-uv run --with flask --with anthropic --with requests --with markdown --with python-docx app.py
-
-# CLI only
-uv run --with anthropic --with requests seo_writer.py "Your Topic Here"
+uv run --with anthropic --with requests --with flask --with markdown --with python-docx app.py
 ```
 
-**Option B — with pip:**
-
+With pip:
 ```bash
-pip install anthropic requests flask markdown python-docx
-```
-
----
-
-## Starting the Web Server
-
-```bash
+pip install -r requirements.txt
 python app.py
 ```
 
-Then open [http://localhost:8080](http://localhost:8080) in your browser.
-
-The UI lets you enter a topic, optional intent, and edition number. Progress streams live as the pipeline runs. Finished articles appear in the articles list with links to view HTML or download DOCX.
-
-To use a custom port:
-
-```bash
-PORT=3000 python app.py
-```
+Then open [http://localhost:8080](http://localhost:8080).
 
 ---
 
-## CLI Usage
+## CLI
 
 ```bash
-# Basic — topic only
+# Basic
 python seo_writer.py "What is RAG in AI"
 
-# With intent (Claude derives the best search keywords)
+# With intent — the agent figures out the right angle and keywords
 python seo_writer.py "ReAct Agents" \
-  --intent "I want to explain to developers how ReAct agents work and why they're better than standard LLMs"
+  --intent "explain to developers how ReAct agents think step by step"
 
-# With explicit keywords
-python seo_writer.py "ReAct Agents" --keywords "react agent AI"
-
-# Custom output directory and newsletter edition number
-python seo_writer.py "ReAct Agents" --output-dir ./articles --edition 31
+# Custom output folder and edition number
+python seo_writer.py "Semantic Caching for LLMs" --output-dir ./articles --edition 31
 ```
 
-### CLI options
-
-| Flag | Description | Default |
-|------|-------------|---------|
-| `topic` | Article topic (required) | — |
-| `--intent` | Natural language description of the article goal | — |
-| `--keywords` | Primary keyword(s) to target | topic text |
-| `--output-dir` | Directory to save output files | `./output` |
-| `--edition` | Newsletter edition number shown in the author intro | `0` |
-
----
-
-## Output Files
-
-All outputs are saved to `./output/` (or the directory you specify):
-
-| File | Description |
+| Flag | Description |
 |------|-------------|
-| `<slug>.md` | Full article in Markdown with author branding |
-| `<slug>.html` | Styled HTML version |
-| `<slug>.docx` | Word document with embedded images |
-| `<slug>_meta.json` | SEO metadata, slug, and image URLs |
+| `topic` | What to write about (required) |
+| `--intent` | What you want readers to take away — agent uses this to pick keywords and angle |
+| `--keywords` | Explicit keywords if you already know what to target |
+| `--output-dir` | Where to save output (default: `./output`) |
+| `--edition` | Newsletter edition number |
 
 ---
 
-## Project Structure
+## Output
+
+Each run produces four files in `./output/`:
+
+| File | What it is |
+|------|------------|
+| `<slug>.md` | Full article in Markdown |
+| `<slug>.html` | Styled HTML, ready to copy into a CMS |
+| `<slug>.docx` | Word document with embedded images |
+| `<slug>_meta.json` | SEO title, meta description, slug, image URLs |
+
+---
+
+## Word Humanizer Add-in
+
+`word-humanizer/` is a separate Microsoft Word add-in. Open it as a sidebar in Word, place your cursor in any paragraph, and click **Humanize** — it rewrites that paragraph to remove AI writing patterns and replaces the text in place.
+
+```bash
+cd word-humanizer
+npm install
+npm run install-certs   # one-time
+npm start               # terminal tab 1
+npm run sideload        # terminal tab 2 — opens Word with the add-in loaded
+```
+
+---
+
+## Project structure
 
 ```
 SEO-writer/
-├── app.py              # Flask web server
-├── seo_writer.py       # Core pipeline + CLI
-├── requirements.txt    # Minimal pip dependencies
+├── seo_writer.py       # Core agent + CLI
+├── app.py              # Web UI (Flask)
+├── requirements.txt
+├── .env.example        # Copy to .env and fill in keys
 ├── templates/
-│   └── index.html      # Web UI template
-├── output/             # Generated articles (git-ignored)
-├── sample-articles/    # Reference articles for style guidance
-└── n8n/                # Original n8n workflow export
+│   └── index.html
+├── sample-articles/    # Your reference articles — agent uses these for style
+├── word-humanizer/     # Word Add-in for humanizing existing documents
+└── n8n/                # Original n8n workflow this was built from
 ```
 
 ---
 
-## Environment Variables
+## Keys
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `ANTHROPIC_API_KEY` | Yes | Claude API key from [console.anthropic.com](https://console.anthropic.com/) |
-| `SERPAPI_KEY` | No | SerpAPI key from [serpapi.com](https://serpapi.com/) — enables live SERP + image search |
-| `PORT` | No | Web server port (default: `8080`) |
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `ANTHROPIC_API_KEY` | Yes | [console.anthropic.com](https://console.anthropic.com/) |
+| `SERPAPI_KEY` | No | [serpapi.com](https://serpapi.com/) — enables live research and real images |
+| `PORT` | No | Web server port, default `8080` |
