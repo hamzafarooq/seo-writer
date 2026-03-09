@@ -15,6 +15,41 @@ The pipeline runs in 8 steps: live SERP research, title refinement, key takeaway
 
 ---
 
+## Pipeline
+
+```
+Topic + Intent
+      │
+      ▼
+1. SERP Research      — pulls live Google results via SerpAPI, reads what's ranking
+      │
+      ▼
+2. Title Refinement   — picks the best angle and target keyword
+      │
+      ▼
+3. Key Takeaways      — identifies what the article must cover to outrank competitors
+      │
+      ▼
+4. Outline            — structures the article before writing begins
+      │
+      ▼
+5. Write              — full draft grounded in research and your sample articles
+      │
+      ▼
+6. Humanize           — strips AI patterns, rewrites to match your voice
+      │
+      ▼
+7. Meta               — generates SEO title, meta description, and slug
+      │
+      ▼
+8. Images             — finds real images via Google Images or Unsplash, embeds in DOCX
+      │
+      ▼
+Output: .md  .html  .docx  _meta.json
+```
+
+---
+
 ## Setup
 
 ### 1. Clone and configure
