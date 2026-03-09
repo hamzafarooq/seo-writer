@@ -12,7 +12,6 @@ The pipeline runs in 8 steps: live SERP research, title refinement, key takeaway
 - **Learns from your sample articles** — drop your best articles into `sample-articles/` and the agent uses them as style references. The output reads like you wrote it, not like ChatGPT.
 - **Finds real images** — searches Google Images (with SerpAPI) or Unsplash and embeds them directly into the DOCX. No placeholder images.
 - **Humanization pass built in** — after writing, the agent rewrites the draft to remove AI patterns before you ever see it.
-- **Word Add-in included** — `word-humanizer/` is a Microsoft Word sidebar that lets you humanize any paragraph in your own documents, one at a time.
 
 ---
 
@@ -87,20 +86,6 @@ Each run produces four files in `./output/`:
 
 ---
 
-## Word Humanizer Add-in
-
-`word-humanizer/` is a separate Microsoft Word add-in. Open it as a sidebar in Word, place your cursor in any paragraph, and click **Humanize** — it rewrites that paragraph to remove AI writing patterns and replaces the text in place.
-
-```bash
-cd word-humanizer
-npm install
-npm run install-certs   # one-time
-npm start               # terminal tab 1
-npm run sideload        # terminal tab 2 — opens Word with the add-in loaded
-```
-
----
-
 ## Project structure
 
 ```
@@ -112,7 +97,6 @@ SEO-writer/
 ├── templates/
 │   └── index.html
 ├── sample-articles/    # Your reference articles — agent uses these for style
-├── word-humanizer/     # Word Add-in for humanizing existing documents
 └── n8n/                # Original n8n workflow this was built from
 ```
 
